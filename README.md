@@ -2,7 +2,7 @@
 
 Projeto desenvolvido no âmbito da disciplina de **Desenvolvimento de Software em Saúde (DSS)** — FMUP.
 
-Implementação de uma API REST seguindo o padrão **MVC** (Model-View-Controller) com Node.js, Express e TypeScript, utilizando armazenamento local em memória.
+Implementação de uma API REST seguindo o padrão **MVC + Service** com Node.js, Express e TypeScript, utilizando armazenamento local em memória.
 
 ## Estrutura do Projeto
 
@@ -14,6 +14,8 @@ projeto-prescricoes/
 │   │   └── prescricao.routes.ts
 │   ├── controllers/           # O "Cérebro" — recebe o pedido da UI
 │   │   └── prescricao.controller.ts
+│   ├── services/              # A "Lógica" — regras de negócio
+│   │   └── prescricao.service.ts
 │   ├── models/                # Os "Dados" — define a Prescrição
 │   │   └── prescricao.entity.ts
 │   ├── database/              # A "Ligação" — armazenamento local
@@ -84,14 +86,15 @@ GET http://localhost:3000/prescricoes
 
 > Pode usar o [Postman](https://www.postman.com/) ou `curl` para testar os endpoints.
 
-## Arquitetura MVC
+## Arquitetura MVC + Service
 
-| Camada         | Ficheiro                          | Responsabilidade                                  |
-|----------------|-----------------------------------|---------------------------------------------------|
-| **Routes**     | `prescricao.routes.ts`            | Define os URLs e liga-os ao controller             |
-| **Controller** | `prescricao.controller.ts`        | Recebe o pedido HTTP e devolve a resposta          |
-| **Model**      | `prescricao.entity.ts`            | Define a estrutura de dados (interface Prescrição) |
-| **Database**   | `local-storage.ts`                | Simula a base de dados com um array em memória     |
+| Camada         | Ficheiro                          | Responsabilidade                                              |
+|----------------|-----------------------------------|---------------------------------------------------------------|
+| **Routes**     | `prescricao.routes.ts`            | Define os URLs e liga-os ao controller                         |
+| **Controller** | `prescricao.controller.ts`        | Recebe o pedido HTTP e delega ao service                       |
+| **Service**    | `prescricao.service.ts`           | Contém as regras de negócio (validações, criação de entidades) |
+| **Model**      | `prescricao.entity.ts`            | Define a estrutura de dados (interface Prescrição)             |
+| **Database**   | `local-storage.ts`                | Simula a base de dados com um array em memória                 |
 
 ## Tecnologias
 
