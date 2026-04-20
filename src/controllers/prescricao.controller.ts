@@ -1,28 +1,23 @@
 import { Request, Response } from 'express';
-import { baseDeDadosLocal } from '../database/local-storage';
-import { Prescricao } from '../models/prescricao.entity';
+import { PrescricaoService } from '../services/prescricao.service';
 
 export class PrescricaoController {
+    private service = new PrescricaoService();
 
     async listar(req: Request, res: Response) {
-        // Retorna tudo o que está na nossa lista
-        return res.json(baseDeDadosLocal);
+        const prescricoes = await this.service.listarPrescricoes();
+        return res.json(prescricoes);
     }
 
     async criar(req: Request, res: Response) {
-        const { medicamento, dose, medico_nome } = req.body;
+        try {
+            const { medicamento, dose, medico_nome } = req.body;
 
-        // Criamos o objeto manualmente
-        const nova: Prescricao = {
-            id: baseDeDadosLocal.length + 1,
-            medicamento,
-            dose,
-            medico_nome
-        };
+            const novaPrescricao = await this.service.criarPrescricao({ medicamento, dose, medico_nome });
 
-        // Guardamos na nossa lista "global"
-        baseDeDadosLocal.push(nova);
-
-        return res.status(201).json(nova);
+            return res.status(201).json(novaPrescricao);
+        } catch (error: any) {
+            return res.status(400).json({ erro: error.message });
+        }
     }
 }
