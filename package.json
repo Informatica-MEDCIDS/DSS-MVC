@@ -1,0 +1,30 @@
+{
+  "name": "dss-mvc",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/Informatica-MEDCIDS/DSS-MVC#readme",
+  "bugs": {
+    "url": "https://github.com/Informatica-MEDCIDS/DSS-MVC/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Informatica-MEDCIDS/DSS-MVC.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "express": "^5.2.1",
+    "install": "^0.13.0",
+    "nodemon": "^3.1.14",
+    "npm": "^11.12.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  }
+}
