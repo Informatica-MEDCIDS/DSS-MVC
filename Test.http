@@ -1,0 +1,13 @@
+### listar
+GET http://localhost:3000/prescricoes
+Accept: application/json
+
+### criar
+POST http://localhost:3000/prescricoes
+Content-Type: application/json
+
+{
+    "medicamento": "Paracetamol",
+    "dose": "500mg",
+    "medico_nome": "Dr. Silva"
+}

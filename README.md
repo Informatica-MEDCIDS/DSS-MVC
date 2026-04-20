@@ -54,7 +54,7 @@ npx tsc
 node dist/app.js
 ```
 
-> O servidor arranca em **http://localhost:3000**
+> O servidor arranca em **<http://localhost:3000>**
 
 ## Endpoints da API
 
