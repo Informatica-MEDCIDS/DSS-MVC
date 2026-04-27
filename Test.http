@@ -11,3 +11,17 @@ Content-Type: application/json
     "dose": "500mg",
     "medico_nome": "Dr. Silva"
 }
+
+### login
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+    "username": "medico",
+    "password": "1234"
+}
+
+### listar prescricoes
+GET http://localhost:3000/prescricoes
+Accept: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJtZWRpY28iLCJyb2xlIjoibWVkaWNvIiwiaWF0IjoxNzc3MzE0NDMzfQ.eGXLEAiIqTZ_cm58rW9vspcOxkNhJ9ev6sQwTVxb65k
