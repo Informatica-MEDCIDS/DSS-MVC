@@ -1,8 +1,17 @@
-// Define a estrutura da nossa Prescrição no sistema 
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
-export interface Prescricao {
-    id: number;
-    medicamento: string;
-    dose: string;
-    medico_nome: string;
+@Entity()
+export class Prescricao {
+
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @Column()
+    medicamento!: string;
+
+    @Column()
+    dose!: string;
+
+    @Column()
+    medico_nome!: string;
 }

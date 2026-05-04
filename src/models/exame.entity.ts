@@ -1,7 +1,17 @@
-// Define a estrutura do nosso Exame no sistema
-export interface Exame {
-    id: number;
-    nome: string;
-    codigo: string;
-    medico_nome: string;
+import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+
+@Entity()
+export class Exame {
+
+    @PrimaryGeneratedColumn()
+    id!: number;
+
+    @Column()
+    nome!: string;
+
+    @Column()
+    codigo!: string;
+
+    @Column()
+    medico_nome!: string;
 }

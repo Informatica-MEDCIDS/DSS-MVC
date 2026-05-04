@@ -1,7 +1,9 @@
-import { baseDeDadosExamesLocal } from '../database/local-storage';
+import { AppDataSource } from '../database/database';
 import { Exame } from '../models/exame.entity';
 
 export class ExameService {
+
+    private repo = AppDataSource.getRepository(Exame);
 
     async criarExame(dados: { nome: string, codigo: string, medico_nome: string }): Promise<Exame> {
 
@@ -9,26 +11,20 @@ export class ExameService {
             throw new Error("O código do exame deve ter exatamente 4 caracteres.");
         }
 
-        const jaExiste = baseDeDadosExamesLocal.find(
-            e => e.nome === dados.nome && e.codigo === dados.codigo && e.medico_nome === dados.medico_nome
-        );
+        const jaExiste = await this.repo.findOneBy({
+            nome: dados.nome,
+            codigo: dados.codigo,
+            medico_nome: dados.medico_nome,
+        });
         if (jaExiste) {
             throw new Error("Já existe um exame igual registado no sistema.");
         }
 
-        const novo: Exame = {
-            id: baseDeDadosExamesLocal.length + 1,
-            nome: dados.nome,
-            codigo: dados.codigo,
-            medico_nome: dados.medico_nome
-        };
-
-        baseDeDadosExamesLocal.push(novo);
-
-        return novo;
+        const novo = this.repo.create(dados);
+        return this.repo.save(novo);
     }
 
     async listarExames(): Promise<Exame[]> {
-        return baseDeDadosExamesLocal;
+        return this.repo.find();
     }
 }
