@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Prescrições</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    h1 { margin-bottom: 24px; }
+    h2 { margin-top: 32px; }
+    form { display: flex; flex-direction: column; gap: 8px; max-width: 400px; }
+    input { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 8px 16px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #005bb5; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+    th { background: #f5f5f5; }
+    .erro { color: red; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function FormularioPrescricao({ onCriada }) {
+      const [medicamento, setMedicamento] = useState('');
+      const [dose, setDose] = useState('');
+      const [medicoNome, setMedicoNome] = useState('');
+      const [erro, setErro] = useState('');
+
+      async function handleSubmit(e) {
+        e.preventDefault();
+        setErro('');
+        const resposta = await fetch('/prescricoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ medicamento, dose, medico_nome: medicoNome }),
+        });
+        if (resposta.ok) {
+          setMedicamento('');
+          setDose('');
+          setMedicoNome('');
+          onCriada();
+        } else {
+          const dados = await resposta.json();
+          setErro(dados.erro || 'Erro ao criar prescrição');
+        }
+      }
+
+      return (
+        <form onSubmit={handleSubmit}>
+          <input value={medicamento} onChange={e => setMedicamento(e.target.value)} placeholder="Medicamento" required />
+          <input value={dose} onChange={e => setDose(e.target.value)} placeholder="Dose" required />
+          <input value={medicoNome} onChange={e => setMedicoNome(e.target.value)} placeholder="Nome do médico" required />
+          <button type="submit">Criar prescrição</button>
+          {erro && <p className="erro">{erro}</p>}
+        </form>
+      );
+    }
+
+    function ListaPrescricoes({ prescricoes }) {
+      if (prescricoes.length === 0) return <p>Nenhuma prescrição registada.</p>;
+      return (
+        <table>
+          <thead>
+            <tr><th>#</th><th>Medicamento</th><th>Dose</th><th>Médico</th></tr>
+          </thead>
+          <tbody>
+            {prescricoes.map(p => (
+              <tr key={p.id}>
+                <td>{p.id}</td>
+                <td>{p.medicamento}</td>
+                <td>{p.dose}</td>
+                <td>{p.medico_nome}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
+    function App() {
+      const [prescricoes, setPrescricoes] = useState([]);
+
+      async function buscarPrescricoes() {
+        const resposta = await fetch('/prescricoes');
+        const dados = await resposta.json();
+        setPrescricoes(dados);
+      }
+
+      useEffect(() => { buscarPrescricoes(); }, []);
+
+      return (
+        <div>
+          <h1>Sistema de Prescrições</h1>
+          <h2>Nova Prescrição</h2>
+          <FormularioPrescricao onCriada={buscarPrescricoes} />
+          <h2>Prescrições Registadas</h2>
+          <ListaPrescricoes prescricoes={prescricoes} />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

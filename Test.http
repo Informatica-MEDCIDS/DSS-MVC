@@ -11,3 +11,27 @@ Content-Type: application/json
     "dose": "500mg",
     "medico_nome": "Dr. Silva"
 }
+
+### listar exames
+GET http://localhost:3000/pedidos-exames
+Accept: application/json
+
+### criar exame (valido)
+POST http://localhost:3000/pedidos-exames
+Content-Type: application/json
+
+{
+    "nome": "TAC Cranio",
+    "codigo": "TC01",
+    "medico_nome": "Dr. Silva"
+}
+
+### criar exame (codigo invalido)
+POST http://localhost:3000/pedidos-exames
+Content-Type: application/json
+
+{
+    "nome": "RM Coluna",
+    "codigo": "RM001",
+    "medico_nome": "Dr. Silva"
+}
