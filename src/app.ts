@@ -19,7 +19,7 @@ if (require.main === module) {
 
         const prescricaoRepo = AppDataSource.getRepository(Prescricao);
         if (await prescricaoRepo.count() === 0) {
-            await prescricaoRepo.save({ medicamento: 'Aspirina', dose: '500mg', medico_nome: 'Dr. House' });
+            await prescricaoRepo.save({ medicamento: 'Aspirina', dose: '500mg', medico_nome: 'Dr. House', dataCriacao: new Date() });
         }
 
         const exameRepo = AppDataSource.getRepository(Exame);

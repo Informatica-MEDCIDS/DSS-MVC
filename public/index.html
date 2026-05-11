@@ -67,7 +67,7 @@
       return (
         <table>
           <thead>
-            <tr><th>#</th><th>Medicamento</th><th>Dose</th><th>Médico</th></tr>
+            <tr><th>#</th><th>Medicamento</th><th>Dose</th><th>Médico</th><th>Data de Criação</th></tr>
           </thead>
           <tbody>
             {prescricoes.map(p => (
@@ -76,6 +76,7 @@
                 <td>{p.medicamento}</td>
                 <td>{p.dose}</td>
                 <td>{p.medico_nome}</td>
+                <td>{p.dataCriacao || 'não exposta'}</td>
               </tr>
             ))}
           </tbody>
@@ -89,6 +90,7 @@
       async function buscarPrescricoes() {
         const resposta = await fetch('/prescricoes');
         const dados = await resposta.json();
+        console.log('Dados recebidos:', dados);
         setPrescricoes(dados);
       }
 
