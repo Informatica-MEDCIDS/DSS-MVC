@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Sistema Clínico</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    nav {
+      width: 220px;
+      background: #1f2937;
+      color: white;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    nav h2 {
+      margin-top: 0;
+      font-size: 20px;
+    }
+
+    nav button {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #374151;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    nav button:hover {
+      background: #4b5563;
+    }
+
+    main {
+      flex: 1;
+      padding: 30px;
+      box-sizing: border-box;
+    }
+
+    .pagina {
+      display: none;
+    }
+
+    .pagina.ativa {
+      display: block;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #f3f4f6;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 400px;
+    }
+
+    input, button.form-btn {
+      padding: 8px;
+      font-size: 14px;
+    }
+
+    .erro {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <h2>Menu</h2>
+    <button onclick="mostrarPagina('pagina-inicio')">Início</button>
+    <button onclick="mostrarPagina('pagina-prescricoes')">Prescrições</button>
+    <button onclick="mostrarPagina('pagina-exames')">Exames</button>
+    <button onclick="mostrarPagina('pagina-fhir')">Consulta FHIR</button>
+  </nav>
+
+  <main>
+    <section id="pagina-inicio" class="pagina ativa">
+      <h1>Sistema Clínico</h1>
+      <p>Escolha uma funcionalidade no menu.</p>
+    </section>
+
+    <section id="pagina-prescricoes" class="pagina">
+      <h1>Prescrições</h1>
+
+      <h2>Nova Prescrição</h2>
+      <form id="formPrescricao">
+        <input id="medicamento" placeholder="Medicamento" required />
+        <input id="dose" placeholder="Dose" required />
+        <input id="medicoNome" placeholder="Nome do médico" required />
+        <button class="form-btn" type="submit">Criar prescrição</button>
+        <p id="erroPrescricao" class="erro"></p>
+      </form>
+
+      <h2>Lista de Prescrições</h2>
+      <div id="listaPrescricoes">
+        <p>A carregar prescrições...</p>
+      </div>
+    </section>
+
+    <section id="pagina-exames" class="pagina">
+      <h1>Exames</h1>
+      <button onclick="buscarExames()">Atualizar exames</button>
+      <div id="listaExames">
+        <p>Nenhum exame carregado.</p>
+      </div>
+    </section>
+
+    <section id="pagina-fhir" class="pagina">
+      <h1>Consulta FHIR</h1>
+      <form id="formFhir">
+        <input id="codigoLoinc" placeholder="Código LOINC" required />
+        <button class="form-btn" type="submit">Pesquisar Observation</button>
+      </form>
+
+      <h2>Resultado</h2>
+      <pre id="resultadoFhir">Sem resultados.</pre>
+    </section>
+  </main>
+
+  <script>
+    function mostrarPagina(idPagina) {
+      const paginas = document.querySelectorAll('.pagina');
+      paginas.forEach(pagina => pagina.classList.remove('ativa'));
+
+      const paginaAtiva = document.getElementById(idPagina);
+      if (paginaAtiva) {
+        paginaAtiva.classList.add('ativa');
+      }
+    }
+
+    async function buscarPrescricoes() {
+        alert('Aqui');
+      const container = document.getElementById('listaPrescricoes');
+      container.innerHTML = '<p>A carregar prescrições...</p>';
+
+      try {
+        const resposta = await fetch('/prescricoes');
+        const dados = await resposta.json();
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+          container.innerHTML = '<p>Nenhuma prescrição registada.</p>';
+          return;
+        }
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Medicamento</th>
+                <th>Dose</th>
+                <th>Médico</th>
+                <th>Data de Criação</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        for (const p of dados) {
+          html += `
+            <tr>
+              <td>${p.id ?? ''}</td>
+              <td>${p.medicamento ?? ''}</td>
+              <td>${p.dose ?? ''}</td>
+              <td>${p.medico_nome ?? ''}</td>
+              <td>${p.dataCriacao ?? 'não exposta'}</td>
+            </tr>
+          `;
+        }
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (erro) {
+        container.innerHTML = '<p>Erro ao carregar prescrições.</p>';
+      }
+    }
+
+    async function buscarExames() {
+      const container = document.getElementById('listaExames');
+      container.innerHTML = '<p>A carregar exames...</p>';
+
+      try {
+        const resposta = await fetch('/exames');
+        const dados = await resposta.json();
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+          container.innerHTML = '<p>Nenhum exame registado.</p>';
+          return;
+        }
+
+        let html = `
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Médico</th>
+                <th>Data de Criação</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        for (const exame of dados) {
+          html += `
+            <tr>
+              <td>${exame.id ?? ''}</td>
+              <td>${exame.nome ?? ''}</td>
+              <td>${exame.codigo ?? ''}</td>
+              <td>${exame.medico_nome ?? ''}</td>
+              <td>${exame.dataCriacao ?? 'não exposta'}</td>
+            </tr>
+          `;
+        }
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch (erro) {
+        container.innerHTML = '<p>Erro ao carregar exames.</p>';
+      }
+    }
+
+    async function criarPrescricao(event) {
+      event.preventDefault();
+
+      const erroPrescricao = document.getElementById('erroPrescricao');
+      erroPrescricao.textContent = '';
+
+      const medicamento = document.getElementById('medicamento').value.trim();
+      const dose = document.getElementById('dose').value.trim();
+      const medico_nome = document.getElementById('medicoNome').value.trim();
+
+      try {
+        const resposta = await fetch('/prescricoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ medicamento, dose, medico_nome })
+        });
+
+        if (!resposta.ok) {
+          const dados = await resposta.json();
+          throw new Error(dados.erro || 'Erro ao criar prescrição');
+        }
+
+        document.getElementById('formPrescricao').reset();
+        await buscarPrescricoes();
+      } catch (erro) {
+        erroPrescricao.textContent = erro.message;
+      }
+    }
+
+    async function pesquisarFhir(event) {
+      event.preventDefault();
+
+      const codigo = document.getElementById('codigoLoinc').value.trim();
+      const resultado = document.getElementById('resultadoFhir');
+      resultado.textContent = 'A pesquisar...';
+
+      try {
+        const resposta = await fetch(`/fhir/observations?code=${encodeURIComponent(codigo)}`);
+        const dados = await resposta.json();
+        resultado.textContent = JSON.stringify(dados, null, 2);
+      } catch (erro) {
+        resultado.textContent = 'Erro ao consultar servidor FHIR.';
+      }
+    }
+
+    document.getElementById('formPrescricao').addEventListener('submit', criarPrescricao);
+    document.getElementById('formFhir').addEventListener('submit', pesquisarFhir);
+
+    buscarPrescricoes();
+  </script>
+</body>
+</html>

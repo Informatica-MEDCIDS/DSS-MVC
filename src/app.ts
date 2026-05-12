@@ -24,7 +24,7 @@ if (require.main === module) {
 
         const exameRepo = AppDataSource.getRepository(Exame);
         if (await exameRepo.count() === 0) {
-            await exameRepo.save({ nome: 'RX Torax', codigo: 'RX01', medico_nome: 'Dr. House' });
+            await exameRepo.save({ nome: 'RX Torax', codigo: 'RX01', medico_nome: 'Dr. House', dataCriacao: new Date() });
         }
 
         app.listen(3000, () => console.log("Servidor (TypeORM + SQLite) a correr na porta 3000"));

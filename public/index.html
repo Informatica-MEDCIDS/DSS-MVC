@@ -84,9 +84,45 @@
       );
     }
 
+    function ListaExames({ exames }) {
+      if (exames.length === 0) return <p>Nenhum exame registada.</p>;
+      return (
+        <table>
+          <thead>
+            <tr><th>#</th><th>Nome</th><th>Código</th><th>Médico</th><th>Data de Criação</th></tr>
+          </thead>
+          <tbody>
+            {exames.map(exam => (
+              <tr key={exam.id}>
+                <td>{exam.id}</td>
+                <td>{exam.nome}</td>
+                <td>{exam.codigo}</td>
+                <td>{exam.medico_nome}</td>
+                <td>{exam.dataCriacao || 'não exposta'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      );
+    }
+
     function App() {
+
+      // O estado para armazenar as prescrições recebidas do backend
       const [prescricoes, setPrescricoes] = useState([]);
 
+      // O estado para armazenar os exames recebidos do backend 
+      const [exames, setExames] = useState([]);
+
+
+      async function buscarExames() {
+        const resposta = await fetch('/exames');
+        const dados = await resposta.json();
+        setExames(dados);
+      }
+
+
+      // Função para buscar as prescrições do backend e atualizar o estado
       async function buscarPrescricoes() {
         const resposta = await fetch('/prescricoes');
         const dados = await resposta.json();
@@ -94,7 +130,12 @@
         setPrescricoes(dados);
       }
 
-      useEffect(() => { buscarPrescricoes(); }, []);
+      // useEffect para buscar as prescrições quando o componente for montado
+      useEffect(() => {
+        buscarPrescricoes();
+        buscarExames();
+      }, []);
+
 
       return (
         <div>
@@ -103,6 +144,10 @@
           <FormularioPrescricao onCriada={buscarPrescricoes} />
           <h2>Prescrições Registadas</h2>
           <ListaPrescricoes prescricoes={prescricoes} />
+
+          <h2>Exames Registados</h2>
+          <ListaExames exames={exames} />
+
         </div>
       );
     }

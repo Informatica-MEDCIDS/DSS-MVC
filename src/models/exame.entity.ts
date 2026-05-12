@@ -14,4 +14,9 @@ export class Exame {
 
     @Column()
     medico_nome!: string;
+
+    // CAMPO NOVO: data de criação da prescrição. Este campo é preenchido automaticamente quando a prescrição é criada. 
+    // Restrito a utilização interna
+    @Column()
+    dataCriacao!: Date;
 }
