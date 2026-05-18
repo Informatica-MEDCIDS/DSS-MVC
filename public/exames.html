@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>Exames</title>
+  <style>
+    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
+    h1 { margin-bottom: 24px; }
+    button { padding: 8px 16px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    button:hover { background: #005bb5; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
+    th { background: #f5f5f5; }
+    .link-back { display: inline-block; margin-bottom: 16px; color: #0070f3; text-decoration: none; }
+    .erro { color: red; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <a class="link-back" href="index.html">← Voltar para prescrições</a>
+  <h1>Lista de Exames</h1>
+  <button id="btnAtualizar">Atualizar exames</button>
+  <div id="listaExames">
+    <p>A carregar exames...</p>
+  </div>
+
+  <script>
+    async function renderExames() {
+      const container = document.getElementById('listaExames');
+      container.innerHTML = '<p>A carregar exames...</p>';
+      try {
+        const resposta = await fetch('/exames');
+        if (!resposta.ok) throw new Error('Erro ao carregar exames');
+        const exames = await resposta.json();
+
+        if (!Array.isArray(exames) || exames.length === 0) {
+          container.innerHTML = '<p>Nenhum exame registado.</p>';
+          return;
+        }
+
+        const linhas = exames.map(exame => {
+          return `
+            <tr>
+              <td>${exame.id ?? ''}</td>
+              <td>${exame.nome ?? ''}</td>
+              <td>${exame.codigo ?? ''}</td>
+              <td>${exame.medico_nome ?? ''}</td>
+              <td>${exame.dataCriacao ?? 'não exposta'}</td>
+            </tr>
+          `;
+        }).join('');
+
+        container.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Médico</th>
+                <th>Data de Criação</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${linhas}
+            </tbody>
+          </table>
+        `;
+      } catch (erro) {
+        container.innerHTML = `<p class="erro">${erro.message || 'Erro ao carregar exames'}.</p>`;
+      }
+    }
+
+    document.getElementById('btnAtualizar').addEventListener('click', renderExames);
+    renderExames();
+  </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <title>index3 - Sistema Clínico</title>
+  <style>
+    body { font-family: sans-serif; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    nav a { margin-right: 16px; color: #0070f3; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    form { display: flex; flex-direction: column; gap: 10px; max-width: 500px; }
+    input { padding: 10px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px 16px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #005bb5; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+    th { background: #f5f5f5; }
+    .error { color: red; margin-top: 12px; }
+    .link-block { display: inline-block; margin-bottom: 16px; color: #0070f3; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>index3 — Sistema Clínico</h1>
+      <p>Versão que mantém exames separados em <a href="exames.html">exames.html</a>.</p>
+    </div>
+    <nav>
+      <a href="index.html">Original</a>
+      <a href="index2.html">index2</a>
+      <a href="exames.html">Exames</a>
+    </nav>
+  </header>
+
+  <section>
+    <h2>Nova Prescrição</h2>
+    <form id="formPrescricao">
+      <input id="medicamento" placeholder="Medicamento" required />
+      <input id="dose" placeholder="Dose" required />
+      <input id="medicoNome" placeholder="Nome do médico" required />
+      <button type="submit">Criar prescrição</button>
+      <p id="erroPrescricao" class="error"></p>
+    </form>
+  </section>
+
+  <section>
+    <h2>Prescrições Registadas</h2>
+    <button id="btnBuscarPrescricoes">Atualizar prescrições</button>
+    <div id="prescricoesContainer"><p>A carregar prescrições...</p></div>
+  </section>
+
+  <script>
+    async function buildPrescricoesTable(prescricoes) {
+      if (!Array.isArray(prescricoes) || prescricoes.length === 0) {
+        return '<p>Nenhuma prescrição registada.</p>';
+      }
+
+      const rows = prescricoes.map(p => `
+        <tr>
+          <td>${p.id ?? ''}</td>
+          <td>${p.medicamento ?? ''}</td>
+          <td>${p.dose ?? ''}</td>
+          <td>${p.medico_nome ?? ''}</td>
+          <td>${p.dataCriacao ?? 'não exposta'}</td>
+        </tr>
+      `).join('');
+
+      return `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Medicamento</th>
+              <th>Dose</th>
+              <th>Médico</th>
+              <th>Data de Criação</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows}
+          </tbody>
+        </table>
+      `;
+    }
+
+    async function buscarPrescricoes() {
+      const container = document.getElementById('prescricoesContainer');
+      container.innerHTML = '<p>A carregar prescrições...</p>';
+      try {
+        const resposta = await fetch('/prescricoes');
+        if (!resposta.ok) throw new Error('Erro ao carregar prescrições');
+        const prescricoes = await resposta.json();
+        container.innerHTML = await buildPrescricoesTable(prescricoes);
+      } catch (erro) {
+        container.innerHTML = `<p class="error">Erro: ${erro.message}</p>`;
+      }
+    }
+
+    async function criarPrescricao(event) {
+      event.preventDefault();
+      const erroPrescricao = document.getElementById('erroPrescricao');
+      erroPrescricao.textContent = '';
+
+      const medicamento = document.getElementById('medicamento').value.trim();
+      const dose = document.getElementById('dose').value.trim();
+      const medico_nome = document.getElementById('medicoNome').value.trim();
+
+      try {
+        const resposta = await fetch('/prescricoes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ medicamento, dose, medico_nome })
+        });
+
+        if (!resposta.ok) {
+          const dados = await resposta.json();
+          throw new Error(dados.erro || 'Erro ao criar prescrição');
+        }
+
+        document.getElementById('formPrescricao').reset();
+        buscarPrescricoes();
+      } catch (erro) {
+        erroPrescricao.textContent = erro.message;
+      }
+    }
+
+    document.getElementById('formPrescricao').addEventListener('submit', criarPrescricao);
+    document.getElementById('btnBuscarPrescricoes').addEventListener('click', buscarPrescricoes);
+    buscarPrescricoes();
+  </script>
+</body>
+</html>
