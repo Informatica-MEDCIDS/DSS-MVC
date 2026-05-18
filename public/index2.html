@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
   <meta charset="UTF-8" />
   <title>Sistema Clínico</title>
@@ -61,7 +62,8 @@
       margin-top: 16px;
     }
 
-    th, td {
+    th,
+    td {
       text-align: left;
       padding: 8px 12px;
       border-bottom: 1px solid #ddd;
@@ -78,7 +80,8 @@
       max-width: 400px;
     }
 
-    input, button.form-btn {
+    input,
+    button.form-btn {
       padding: 8px;
       font-size: 14px;
     }
@@ -88,6 +91,7 @@
     }
   </style>
 </head>
+
 <body>
   <nav>
     <h2>Menu</h2>
@@ -132,12 +136,19 @@
     <section id="pagina-fhir" class="pagina">
       <h1>Consulta FHIR</h1>
       <form id="formFhir">
-        <input id="codigoLoinc" placeholder="Código LOINC" required />
+        <input id="codigoLoinc" value="8310-5" placeholder="Código LOINC" required />
         <button class="form-btn" type="submit">Pesquisar Observation</button>
       </form>
 
       <h2>Resultado</h2>
-      <pre id="resultadoFhir">Sem resultados.</pre>
+
+      <div id="resultadoFhir">
+
+        <p>Sem resultados.</p>
+
+      </div>
+
+      </div>
     </section>
   </main>
 
@@ -153,7 +164,7 @@
     }
 
     async function buscarPrescricoes() {
-        alert('Aqui');
+      alert('Aqui');
       const container = document.getElementById('listaPrescricoes');
       container.innerHTML = '<p>A carregar prescrições...</p>';
 
@@ -275,19 +286,113 @@
     }
 
     async function pesquisarFhir(event) {
+
       event.preventDefault();
 
       const codigo = document.getElementById('codigoLoinc').value.trim();
+
       const resultado = document.getElementById('resultadoFhir');
-      resultado.textContent = 'A pesquisar...';
+
+      resultado.innerHTML = '<p>A pesquisar...</p>';
 
       try {
+
         const resposta = await fetch(`/fhir/observations?code=${encodeURIComponent(codigo)}`);
+
+        if (!resposta.ok) {
+
+          throw new Error('Erro na resposta do servidor');
+
+        }
+
         const dados = await resposta.json();
-        resultado.textContent = JSON.stringify(dados, null, 2);
+
+        if (!Array.isArray(dados) || dados.length === 0) {
+
+          resultado.innerHTML = '<p>Nenhuma Observation encontrada para esse código LOINC.</p>';
+
+          return;
+
+        }
+
+        let html = `
+
+      <table>
+
+        <thead>
+
+          <tr>
+
+            <th>ID</th>
+
+            <th>Código LOINC</th>
+
+            <th>Descrição</th>
+
+            <th>Valor</th>
+
+            <th>Unidade</th>
+
+            <th>Data/Hora</th>
+
+            <th>Doente</th>
+
+            <th>Estado</th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+    `;
+
+        for (const obs of dados) {
+
+          html += `
+
+        <tr>
+
+          <td>${obs.id ?? ''}</td>
+
+          <td>${obs.code ?? ''}</td>
+
+          <td>${obs.display ?? ''}</td>
+
+          <td>${obs.value ?? ''}</td>
+
+          <td>${obs.unit ?? ''}</td>
+
+          <td>${obs.effectiveDateTime ?? ''}</td>
+
+          <td>${obs.subject ?? ''}</td>
+
+          <td>${obs.status ?? ''}</td>
+
+        </tr>
+
+      `;
+
+        }
+
+        html += `
+
+        </tbody>
+
+      </table>
+
+    `;
+
+        resultado.innerHTML = html;
+
       } catch (erro) {
-        resultado.textContent = 'Erro ao consultar servidor FHIR.';
+
+        console.error(erro);
+
+        resultado.innerHTML = '<p class="erro">Erro ao consultar servidor FHIR.</p>';
+
       }
+
     }
 
     document.getElementById('formPrescricao').addEventListener('submit', criarPrescricao);
@@ -296,4 +401,5 @@
     buscarPrescricoes();
   </script>
 </body>
+
 </html>

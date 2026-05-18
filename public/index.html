@@ -2,57 +2,122 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8" />
-  <title>Prescrições</title>
+  <title>Prescrições e FHIR</title>
+
   <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
   <style>
-    body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; }
-    h1 { margin-bottom: 24px; }
-    h2 { margin-top: 32px; }
-    form { display: flex; flex-direction: column; gap: 8px; max-width: 400px; }
-    input { padding: 8px; font-size: 14px; border: 1px solid #ccc; border-radius: 4px; }
-    button { padding: 8px 16px; background: #0070f3; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
-    button:hover { background: #005bb5; }
-    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #eee; }
-    th { background: #f5f5f5; }
-    .erro { color: red; margin-top: 8px; }
+    body {
+      font-family: sans-serif;
+      max-width: 1100px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    h2 {
+      margin-top: 32px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 400px;
+    }
+
+    input {
+      padding: 8px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 8px 16px;
+      background: #0070f3;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background: #005bb5;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    th {
+      background: #f5f5f5;
+    }
+
+    .erro {
+      color: red;
+      margin-top: 8px;
+    }
   </style>
 </head>
+
 <body>
-  <h2>XPTO</h2>
 
-
-  <div id="root">
-
-
-    
-  </div>
+  <div id="root"></div>
 
   <script type="text/babel">
+
     const { useState, useEffect } = React;
 
     function FormularioPrescricao({ onCriada }) {
+
       const [medicamento, setMedicamento] = useState('');
       const [dose, setDose] = useState('');
       const [medicoNome, setMedicoNome] = useState('');
       const [erro, setErro] = useState('');
 
       async function handleSubmit(e) {
+
         e.preventDefault();
+
         setErro('');
+
         const resposta = await fetch('/prescricoes', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ medicamento, dose, medico_nome: medicoNome }),
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            medicamento,
+            dose,
+            medico_nome: medicoNome
+          }),
         });
+
         if (resposta.ok) {
+
           setMedicamento('');
           setDose('');
           setMedicoNome('');
+
           onCriada();
+
         } else {
+
           const dados = await resposta.json();
           setErro(dados.erro || 'Erro ao criar prescrição');
         }
@@ -60,24 +125,62 @@
 
       return (
         <form onSubmit={handleSubmit}>
-          <input value={medicamento} onChange={e => setMedicamento(e.target.value)} placeholder="Medicamento" required />
-          <input value={dose} onChange={e => setDose(e.target.value)} placeholder="Dose" required />
-          <input value={medicoNome} onChange={e => setMedicoNome(e.target.value)} placeholder="Nome do médico" required />
-          <button type="submit">Criar prescrição</button>
+
+          <input
+            value={medicamento}
+            onChange={e => setMedicamento(e.target.value)}
+            placeholder="Medicamento"
+            required
+          />
+
+          <input
+            value={dose}
+            onChange={e => setDose(e.target.value)}
+            placeholder="Dose"
+            required
+          />
+
+          <input
+            value={medicoNome}
+            onChange={e => setMedicoNome(e.target.value)}
+            placeholder="Nome do médico"
+            required
+          />
+
+          <button type="submit">
+            Criar prescrição
+          </button>
+
           {erro && <p className="erro">{erro}</p>}
+
         </form>
       );
     }
 
     function ListaPrescricoes({ prescricoes }) {
-      if (prescricoes.length === 0) return <p>Nenhuma prescrição registada.</p>;
+
+      if (prescricoes.length === 0) {
+        return <p>Nenhuma prescrição registada.</p>;
+      }
+
       return (
+
         <table>
+
           <thead>
-            <tr><th>#</th><th>Medicamento</th><th>Dose</th><th>Médico</th><th>Data de Criação</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Medicamento</th>
+              <th>Dose</th>
+              <th>Médico</th>
+              <th>Data</th>
+            </tr>
           </thead>
+
           <tbody>
+
             {prescricoes.map(p => (
+
               <tr key={p.id}>
                 <td>{p.id}</td>
                 <td>{p.medicamento}</td>
@@ -85,21 +188,39 @@
                 <td>{p.medico_nome}</td>
                 <td>{p.dataCriacao || 'não exposta'}</td>
               </tr>
+
             ))}
+
           </tbody>
+
         </table>
       );
     }
 
     function ListaExames({ exames }) {
-      if (exames.length === 0) return <p>Nenhum exame registada.</p>;
+
+      if (exames.length === 0) {
+        return <p>Nenhum exame registado.</p>;
+      }
+
       return (
+
         <table>
+
           <thead>
-            <tr><th>#</th><th>Nome</th><th>Código</th><th>Médico</th><th>Data de Criação</th></tr>
+            <tr>
+              <th>#</th>
+              <th>Nome</th>
+              <th>Código</th>
+              <th>Médico</th>
+              <th>Data</th>
+            </tr>
           </thead>
+
           <tbody>
+
             {exames.map(exam => (
+
               <tr key={exam.id}>
                 <td>{exam.id}</td>
                 <td>{exam.nome}</td>
@@ -107,59 +228,141 @@
                 <td>{exam.medico_nome}</td>
                 <td>{exam.dataCriacao || 'não exposta'}</td>
               </tr>
+
             ))}
+
           </tbody>
+
+        </table>
+      );
+    }
+
+    function ListaObservations({ observations }) {
+
+      if (observations.length === 0) {
+        return <p>Nenhuma observation encontrada.</p>;
+      }
+
+      return (
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Código</th>
+              <th>Descrição</th>
+              <th>Valor</th>
+              <th>Unidade</th>
+              <th>Data</th>
+              <th>Doente</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            {observations.map(obs => (
+
+              <tr key={obs.id}>
+
+                <td>{obs.id}</td>
+                <td>{obs.code}</td>
+                <td>{obs.display}</td>
+                <td>{obs.value}</td>
+                <td>{obs.unit}</td>
+                <td>{obs.effectiveDateTime}</td>
+                <td>{obs.subject}</td>
+
+              </tr>
+
+            ))}
+
+          </tbody>
+
         </table>
       );
     }
 
     function App() {
 
-      // O estado para armazenar as prescrições recebidas do backend
       const [prescricoes, setPrescricoes] = useState([]);
-
-      // O estado para armazenar os exames recebidos do backend 
       const [exames, setExames] = useState([]);
+      const [observations, setObservations] = useState([]);
 
-
-      async function buscarExames() {
-        const resposta = await fetch('/exames');
-        const dados = await resposta.json();
-        setExames(dados);
-      }
-
-
-      // Função para buscar as prescrições do backend e atualizar o estado
       async function buscarPrescricoes() {
+
         const resposta = await fetch('/prescricoes');
         const dados = await resposta.json();
-        console.log('Dados recebidos:', dados);
+
         setPrescricoes(dados);
       }
 
-      // useEffect para buscar as prescrições quando o componente for montado
+      async function buscarExames() {
+
+        const resposta = await fetch('/exames');
+        const dados = await resposta.json();
+
+        setExames(dados);
+      }
+
+      async function buscarObservations() {
+
+        const resposta = await fetch('/fhir/observations?code=8310-5&patient=cfsb1778864462910');
+
+        const dados = await resposta.json();
+
+        console.log('Observations FHIR:', dados);
+
+        setObservations(dados);
+      }
+
       useEffect(() => {
+
         buscarPrescricoes();
         buscarExames();
+        buscarObservations();
+
       }, []);
 
-
       return (
+
         <div>
-          <h1>Sistema de Prescrições</h1>
+
+          <h1>Sistema de Prescrições + FHIR</h1>
+
           <h2>Nova Prescrição</h2>
-          <FormularioPrescricao onCriada={buscarPrescricoes} />
+
+          <FormularioPrescricao
+            onCriada={buscarPrescricoes}
+          />
+
           <h2>Prescrições Registadas</h2>
-          <ListaPrescricoes prescricoes={prescricoes} />
+
+          <ListaPrescricoes
+            prescricoes={prescricoes}
+          />
 
           <h2>Exames Registados</h2>
-          <ListaExames exames={exames} />
+
+          <ListaExames
+            exames={exames}
+          />
+
+          <h2>Observations FHIR</h2>
+
+          <ListaObservations
+            observations={observations}
+          />
 
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    ReactDOM
+      .createRoot(document.getElementById('root'))
+      .render(<App />);
+
   </script>
+
 </body>
 </html>
